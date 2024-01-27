@@ -13,16 +13,17 @@ import (
 )
 
 type Context struct {
-	Title string
-	// URL      string
-	// Price    string
-	// Area     float32
+	Title   string
+	URL     string
+	Price   string
+	Area    string
+	Contact string
 	// Location string
 }
 
 func main() {
 	fakeChrome := req.DefaultClient().ImpersonateChrome()
-	c := colly.NewCollector(colly.MaxDepth(1),
+	c := colly.NewCollector(colly.MaxDepth(2),
 		colly.UserAgent(fakeChrome.Headers.Get("user-agent")))
 	c.SetClient(&http.Client{Transport: fakeChrome.Transport})
 	c.SetRequestTimeout(120 * time.Second)
@@ -33,6 +34,10 @@ func main() {
 		e.ForEach("div.content-item", func(i int, h *colly.HTMLElement) {
 			item := Context{}
 			item.Title = h.ChildText("div.ct_title")
+			item.URL = "https://i-batdongsan.com/" + h.ChildAttr("a[href]", "href")
+			item.Price = h.ChildText("div.ct_price")
+			item.Area = h.ChildText("div.ct_dt")
+			item.Contact = h.ChildText("div.ct_contact")
 			contexts = append(contexts, item)
 		})
 	})
